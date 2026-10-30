@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Interview practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F2F4F7;
+    --surface: #FFFFFF;
+    --ink: #15181F;
+    --muted: #596273;
+    --line: #D3D8E0;
+    --field: #8A93A3;
+    --marker: #F2B705;
+    --on-marker: #15181F;
+    --error: #B3261E;
+    --display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+    --body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #101216;
+      --surface: #181B21;
+      --ink: #ECEEF2;
+      --muted: #9AA3B2;
+      --line: #2B303A;
+      --field: #5A6272;
+      --error: #FF8A80;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+  .site-header { border-bottom: 1px solid var(--line); }
+  .wordmark { margin: 0; padding: 18px 0; font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+  .page { padding-top: 40px; padding-bottom: 72px; }
+
+  h1, h2 { font-family: var(--display); line-height: 1.2; margin: 0; }
+  h1:focus, h2:focus { outline: none; }
+  .page-title { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; letter-spacing: -0.01em; }
+  .section-title { font-size: 1.25rem; font-weight: 650; }
+  .lede { color: var(--muted); max-width: 52ch; margin: 14px 0 0; }
+
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- setup ---------- */
+  .setup { display: grid; gap: 48px; grid-template-columns: 1fr; }
+  @media (min-width: 800px) { .setup { grid-template-columns: 1fr 1fr; gap: 72px; } }
+  .criteria { margin: 32px 0 0; }
+  .criteria dt { font-weight: 600; }
+  .criteria dd { margin: 0 0 14px; color: var(--muted); max-width: 46ch; }
+
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .hint { color: var(--muted); font-size: 0.875rem; margin: 6px 0 0; }
+  .input {
+    width: 100%;
+    font: inherit;
+    padding: 10px 12px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--field);
+    border-radius: 6px;
+  }
+  textarea.input { resize: vertical; min-height: 9rem; line-height: 1.5; }
+
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: 0.6; cursor: progress; }
+  .btn-quiet { background: transparent; color: var(--ink); }
+
+  .alert {
+    border: 1.5px solid var(--error);
+    background: var(--surface);
+    color: var(--error);
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .alert-detail { display: block; margin-top: 4px; font-weight: 400; font-size: 0.875rem; color: var(--muted); overflow-wrap: anywhere; }
+
+  /* ---------- interview ---------- */
+  .interview, .summary { max-width: 720px; }
+  .progress-text { margin: 0; color: var(--muted); font-weight: 500; }
+  .track { display: flex; gap: 4px; margin: 8px 0 28px; }
+  .track-step { flex: 1; max-width: 48px; height: 8px; border-radius: 2px; background: var(--line); }
+  .track-step.is-done { background: var(--ink); }
+  .track-step.is-now { background: var(--marker); box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+  .question { font-size: clamp(1.5rem, 3.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.005em; margin-bottom: 24px; }
+  .answer-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 14px; }
+  .counter { margin-left: auto; color: var(--muted); font-size: 0.875rem; }
+
+  .feedback { margin-top: 36px; padding-left: 20px; border-left: 6px solid var(--marker); }
+  .feedback-text { margin: 16px 0 24px; max-width: 62ch; }
+
+  .meter { display: grid; grid-template-columns: 9.5rem 1fr 3.25rem; align-items: center; gap: 12px; margin: 12px 0; }
+  .meter-label { font-weight: 500; }
+  .meter-value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .meter-segs { display: flex; gap: 3px; }
+  .seg { flex: 1; height: 16px; border: 1.5px solid var(--ink); border-radius: 2px; background: transparent; transition: background-color 0.15s ease; }
+  .seg.on { background: var(--marker); }
+  @media (max-width: 520px) {
+    .meter { grid-template-columns: 1fr auto; row-gap: 6px; }
+    .meter-segs { grid-column: 1 / -1; order: 3; }
+  }
+
+  .history { margin-top: 44px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .history summary { cursor: pointer; font-weight: 600; }
+  .history ol { padding-left: 1.2rem; margin: 14px 0 0; }
+  .history li { margin-bottom: 14px; }
+  .history-scores { display: block; color: var(--muted); font-size: 0.875rem; }
+
+  /* ---------- summary ---------- */
+  .overall { display: inline-flex; align-items: baseline; gap: 10px; background: var(--marker); color: var(--on-marker); padding: 10px 20px; border-radius: 6px; margin: 24px 0 28px; }
+  .overall-num { font-family: var(--display); font-weight: 750; font-size: 3.5rem; line-height: 1; }
+  .summary-columns { display: grid; gap: 28px; grid-template-columns: 1fr; margin: 32px 0; }
+  @media (min-width: 700px) { .summary-columns { grid-template-columns: 1fr 1fr; gap: 40px; } }
+  .summary-columns ul { margin: 12px 0 0; padding-left: 1.1rem; }
+  .summary-columns li { margin-bottom: 8px; }
+  .summary-note { max-width: 62ch; margin: 0 0 32px; }
+
+  @media (prefers-reduced-motion: reduce) { .seg { transition: none; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap"><p class="wordmark">Interview practice</p></div>
+</header>
+
+<main class="wrap page">
+  <div id="alert" class="alert" role="alert" hidden></div>
+
+  <!-- 1. Setup -->
+  <section id="view-setup" class="setup" aria-labelledby="setup-title">
+    <div>
+      <h1 id="setup-title" class="page-title">Practice your interview</h1>
+      <p class="lede">Choose a role and an experience level. You get questions written for that role, and every answer is scored on three things.</p>
+      <dl class="criteria">
+        <dt>Relevance</dt><dd>Did you answer the question that was asked?</dd>
+        <dt>Clarity</dt><dd>Is your answer well structured and easy to follow?</dd>
+        <dt>Technical depth</dt><dd>Is it correct and detailed enough for your level?</dd>
+      </dl>
+    </div>
+
+    <form id="setup-form" novalidate>
+      <div class="field">
+        <label for="role">Role</label>
+        <input id="role" class="input" value="Machine Learning Engineer" required minlength="2" maxlength="100" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="level">Experience level</label>
+        <select id="level" class="input">
+          <option value="fresher">Fresher</option>
+          <option value="junior">Junior</option>
+          <option value="mid">Mid-level</option>
+          <option value="senior">Senior</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="skills">Skills</label>
+        <input id="skills" class="input" value="Python, PyTorch, FastAPI" autocomplete="off" aria-describedby="skills-hint">
+        <p id="skills-hint" class="hint">Separate skills with commas. Up to 15.</p>
+      </div>
+      <div class="field">
+        <label for="num">Number of questions</label>
+        <input id="num" class="input" type="number" min="1" max="10" value="5" inputmode="numeric">
+      </div>
+      <button id="start" class="btn" type="submit">Start interview</button>
+    </form>
+  </section>
+
+  <!-- 2. Interview -->
+  <section id="view-interview" class="interview" aria-live="off" hidden>
+    <p id="progress-text" class="progress-text"></p>
+    <div id="track" class="track" aria-hidden="true"></div>
+    <h1 id="question" class="question" tabindex="-1"></h1>
+
+    <div id="composer">
+      <label for="answer" class="section-title">Your answer</label>
+      <textarea id="answer" class="input" maxlength="5000" style="margin-top:10px"></textarea>
+      <div id="composer-foot" class="answer-foot">
+        <button id="submit" class="btn" type="button">Submit answer</button>
+        <span class="hint" style="margin:0">Ctrl+Enter also submits</span>
+        <span id="counter" class="counter">0 / 5000</span>
+      </div>
+    </div>
+
+    <div id="feedback" class="feedback" hidden>
+      <h2 id="feedback-title" class="section-title" tabindex="-1">Feedback on your answer</h2>
+      <p id="feedback-text" class="feedback-text"></p>
+      <div id="feedback-meters"></div>
+      <div class="answer-foot">
+        <button id="next" class="btn" type="button">Next question</button>
+      </div>
+    </div>
+
+    <details id="history" class="history" hidden>
+      <summary id="history-summary">Earlier answers</summary>
+      <ol id="history-list"></ol>
+    </details>
+  </section>
+
+  <!-- 3. Summary -->
+  <section id="view-summary" class="summary" hidden>
+    <h1 id="summary-title" class="page-title" tabindex="-1">Your results</h1>
+    <div class="overall"><span id="overall-num" class="overall-num"></span><span>out of 10 overall</span></div>
+    <div id="summary-meters"></div>
+    <div class="summary-columns">
+      <div><h2 class="section-title">What went well</h2><ul id="strengths"></ul></div>
+      <div><h2 class="section-title">What to work on</h2><ul id="improvements"></ul></div>
+    </div>
+    <p id="overall-feedback" class="summary-note"></p>
+    <button id="restart" class="btn btn-quiet" type="button">Start another interview</button>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const state = { sessionId: null, total: 0, next: null, finished: false, history: [], current: null };
+
+// Build DOM with textContent only, so text from the model can never inject HTML.
+function el(tag, opts = {}, children = []) {
+  const node = document.createElement(tag);
+  if (opts.class) node.className = opts.class;
+  if (opts.text !== undefined) node.textContent = opts.text;
+  if (opts.attrs) for (const [k, v] of Object.entries(opts.attrs)) node.setAttribute(k, v);
+  children.forEach((c) => node.appendChild(c));
+  return node;
+}
+
+async function api(path, options) {
+  let res;
+  try {
+    res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
+  } catch {
+    throw { status: 0, detail: "" };
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail ?? data);
+    throw { status: res.status, detail };
+  }
+  return data;
+}
+
+function explain(err) {
+  switch (err.status) {
+    case 0:   return ["Can't reach the server. Check that it is still running, then try again.", ""];
+    case 404: return ["This interview is no longer available. Start a new one.", ""];
+    case 409: return [err.detail || "That action isn't available right now.", ""];
+    case 422: return ["Some of your input isn't valid. Check each field and try again.", err.detail];
+    case 502: return ["The scoring service didn't respond properly. Wait a moment, then try again.", err.detail];
+    default:  return ["The server hit a problem.", err.detail];
+  }
+}
+
+function showError(err) {
+  const [message, detail] = explain(err);
+  const box = $("alert");
+  box.textContent = message;
+  if (detail) box.appendChild(el("span", { class: "alert-detail", text: detail }));
+  box.hidden = false;
+  box.scrollIntoView({ block: "nearest" });
+}
+function clearError() { $("alert").hidden = true; $("alert").textContent = ""; }
+
+function show(view) {
+  for (const name of ["setup", "interview", "summary"]) $("view-" + name).hidden = name !== view;
+}
+
+function setBusy(button, busy, busyText, idleText) {
+  button.disabled = busy;
+  button.textContent = busy ? busyText : idleText;
+}
+
+function meter(label, value) {
+  const filled = Math.round(value);
+  const segs = el("div", { class: "meter-segs" });
+  const boxes = [];
+  for (let i = 0; i < 10; i++) { const s = el("span", { class: "seg" }); segs.appendChild(s); boxes.push(s); }
+  const root = el("div", { class: "meter", attrs: { role: "img", "aria-label": `${label}: ${value} out of 10` } }, [
+    el("span", { class: "meter-label", text: label }),
+    segs,
+    el("span", { class: "meter-value", text: `${value}/10` }),
+  ]);
+  // The fill-in is the one animated moment, and it answers the user's own action.
+  boxes.forEach((s, i) => {
+    if (i >= filled) return;
+    if (reduceMotion) s.classList.add("on");
+    else setTimeout(() => s.classList.add("on"), 150 + i * 55);
+  });
+  return root;
+}
+
+function renderMeters(container, scores) {
+  container.replaceChildren(
+    meter("Relevance", scores.relevance),
+    meter("Clarity", scores.clarity),
+    meter("Technical depth", scores.technical_depth),
+  );
+}
+
+function renderTrack(index, total) {
+  const track = $("track");
+  track.replaceChildren();
+  for (let i = 1; i <= total; i++) {
+    track.appendChild(el("span", { class: "track-step" + (i < index ? " is-done" : i === index ? " is-now" : "") }));
+  }
+}
+
+function renderHistory() {
+  const list = $("history-list");
+  list.replaceChildren();
+  state.history.forEach((h) => {
+    list.appendChild(el("li", {}, [
+      el("span", { text: h.question }),
+      el("span", { class: "history-scores", text:
+        `Relevance ${h.ev.relevance}, clarity ${h.ev.clarity}, technical depth ${h.ev.technical_depth}` }),
+    ]));
+  });
+  $("history").hidden = state.history.length === 0;
+  $("history-summary").textContent = `Earlier answers (${state.history.length})`;
+}
+
+function renderQuestion(q) {
+  state.current = q;
+  $("progress-text").textContent = `Question ${q.index} of ${q.total}`;
+  renderTrack(q.index, q.total);
+  $("question").textContent = q.text;
+  const box = $("answer");
+  box.value = ""; box.readOnly = false;
+  $("counter").textContent = "0 / 5000";
+  $("composer-foot").hidden = false;
+  $("feedback").hidden = true;
+  renderHistory();
+  $("question").focus();
+}
+
+// ---------- actions ----------
+$("setup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearError();
+  const role = $("role").value.trim();
+  if (role.length < 2) { showError({ status: 409, detail: "Enter a role with at least 2 characters." }); return; }
+  const skills = $("skills").value.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 15);
+  const num = Math.min(10, Math.max(1, Number($("num").value) || 5));
+  const btn = $("start");
+  setBusy(btn, true, "Writing questions…", "Start interview");
+  try {
+    const data = await api("/sessions", { method: "POST", body: JSON.stringify({
+      role, experience_level: $("level").value, skills, num_questions: num }) });
+    state.sessionId = data.session_id;
+    state.total = data.question.total;
+    state.history = [];
+    show("interview");
+    renderQuestion(data.question);
+  } catch (err) { showError(err); }
+  finally { setBusy(btn, false, "", "Start interview"); }
+});
+
+$("answer").addEventListener("input", () => {
+  $("counter").textContent = `${$("answer").value.length} / 5000`;
+});
+$("answer").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); $("submit").click(); }
+});
+
+$("submit").addEventListener("click", async () => {
+  clearError();
+  const text = $("answer").value.trim();
+  if (!text) { showError({ status: 409, detail: "Write an answer before submitting." }); $("answer").focus(); return; }
+  const btn = $("submit");
+  setBusy(btn, true, "Scoring…", "Submit answer");
+  try {
+    const data = await api(`/sessions/${state.sessionId}/answer`, { method: "POST", body: JSON.stringify({ answer: text }) });
+    state.history.push({ question: state.current.text, ev: data.evaluation });
+    state.next = data.next_question;
+    state.finished = data.finished;
+    $("answer").readOnly = true;      // keep the answer on screen next to its feedback
+    $("composer-foot").hidden = true;
+    $("feedback-text").textContent = data.evaluation.feedback;
+    renderMeters($("feedback-meters"), data.evaluation);
+    $("next").textContent = data.finished ? "See results" : "Next question";
+    $("feedback").hidden = false;
+    $("feedback-title").focus();
+  } catch (err) { showError(err); }
+  finally { setBusy(btn, false, "", "Submit answer"); }
+});
+
+$("next").addEventListener("click", async () => {
+  clearError();
+  if (!state.finished) { renderQuestion(state.next); return; }
+  const btn = $("next");
+  setBusy(btn, true, "Writing results…", "See results");
+  try {
+    const s = await api(`/sessions/${state.sessionId}/summary`);
+    $("overall-num").textContent = s.overall_score;
+    renderMeters($("summary-meters"), s.average_scores);
+    $("strengths").replaceChildren(...s.strengths.map((t) => el("li", { text: t })));
+    $("improvements").replaceChildren(...s.improvements.map((t) => el("li", { text: t })));
+    $("overall-feedback").textContent = s.overall_feedback;
+    show("summary");
+    $("summary-title").focus();
+  } catch (err) { showError(err); }
+  finally { setBusy(btn, false, "", "See results"); }
+});
+
+$("restart").addEventListener("click", () => {
+  clearError();
+  state.sessionId = null; state.history = [];
+  show("setup");
+  $("role").focus();
+});
+</script>
+</body>
+</html>
