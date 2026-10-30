@@ -12,7 +12,7 @@ New to the project? Read `LEARN.md` first.
 3. Copy `.env.example` to `.env` and put your Gemini API key in it
    (or set `LLM_BACKEND=mock` to try it with no key)
 4. `uvicorn app.main:app --reload`
-5. Open http://127.0.0.1:8000 (the app) or http://127.0.0.1:8000/docs (interactive API docs)
+5. Open https://interview-prep-chatbot-1.onrender.com/
 
 ## Test it
 
